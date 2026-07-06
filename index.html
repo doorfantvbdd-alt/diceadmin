@@ -1,537 +1,404 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dice Telemetry Control Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght=500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #06040a;
-            --panel-bg: rgba(14, 11, 26, 0.75);
-            --panel-border: rgba(255, 255, 255, 0.05);
-            --accent-purple: #bd5cff;
-            --accent-danger: #ff4a70;
-            --accent-success: #28f58b;
-            --accent-warning: #ff8838;
-            --text-main: #ffffff;
-            --text-muted: #827f9c;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>Pit Control — Colour Dice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --felt-dark: #0a2018;
+        --felt-panel: #0f2c21;
+        --felt-panel-raised: #123626;
+        --brass: #c9a227;
+        --brass-light: #e8c766;
+        --brass-dim: rgba(201, 162, 39, 0.35);
+        --cream: #f3ecd8;
+        --mono-grey: #7c9c8b;
+        --led-amber: #ffb238;
+        --led-green: #3fe08a;
+        --led-red: #ff5c5c;
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        --die-red: #e6342b;
+        --die-orange: #ff7a1a;
+        --die-yellow: #ffcf33;
+        --die-green: #29b84a;
+        --die-blue: #2f5fe6;
+        --die-purple: #8a3bef;
+    }
 
-        body {
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(circle at 80% 10%, rgba(189, 92, 255, 0.04) 0%, transparent 50%),
-                radial-gradient(circle at 10% 90%, rgba(255, 136, 56, 0.04) 0%, transparent 50%);
-            color: var(--text-main);
-            font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
-            padding: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; }
+    body {
+        background:
+            radial-gradient(ellipse at top, rgba(255,255,255,0.03), transparent 60%),
+            var(--felt-dark);
+        background-image:
+            radial-gradient(ellipse at top, rgba(255,255,255,0.03), transparent 60%),
+            repeating-linear-gradient(135deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px),
+            linear-gradient(var(--felt-dark), var(--felt-dark));
+        color: var(--cream);
+        font-family: 'Inter', -apple-system, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: max(28px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+    }
 
-        /* LOGIN SCREEN SYSTEM */
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: var(--bg-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            padding: 20px;
-        }
+    /* MARQUEE HEADER */
+    .marquee {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .marquee .eyebrow {
+        font-family: 'Space Mono', monospace;
+        font-size: 0.68rem;
+        letter-spacing: 3px;
+        color: var(--brass);
+        text-transform: uppercase;
+    }
+    .marquee h1 {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2.6rem;
+        letter-spacing: 3px;
+        color: var(--cream);
+        line-height: 1;
+        margin-top: 4px;
+        text-shadow: 0 0 18px rgba(201, 162, 39, 0.25);
+    }
+    .marquee p {
+        font-size: 0.82rem;
+        color: var(--mono-grey);
+        margin-top: 8px;
+        line-height: 1.5;
+        max-width: 320px;
+    }
 
-        .login-card {
-            background: rgba(14, 11, 26, 0.9);
-            border: 1px solid rgba(189, 92, 255, 0.2);
-            padding: 40px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(189, 92, 255, 0.1);
-            text-align: center;
-        }
+    /* BRASS-FRAMED SESSION PLATE */
+    .session-plate {
+        width: 100%;
+        max-width: 380px;
+        background: var(--felt-panel);
+        border: 1px solid var(--brass-dim);
+        border-radius: 14px;
+        padding: 16px;
+        position: relative;
+        margin-bottom: 16px;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .session-plate::before, .session-plate::after,
+    .rivet-tl, .rivet-tr, .rivet-bl, .rivet-br {
+        content: '';
+        position: absolute;
+        width: 5px; height: 5px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, var(--brass-light), var(--brass) 60%, #6b5310 100%);
+    }
+    .rivet-tl { top: 7px; left: 7px; }
+    .rivet-tr { top: 7px; right: 7px; }
+    .rivet-bl { bottom: 7px; left: 7px; }
+    .rivet-br { bottom: 7px; right: 7px; }
 
-        .login-card h2 {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #ff94cc 0%, #bd5cff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    .session-row { display: flex; gap: 8px; }
+    input#session-input {
+        flex: 1;
+        min-width: 0;
+        background: #081912;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        padding: 13px 14px;
+        color: var(--cream);
+        font-family: 'Space Mono', monospace;
+        font-size: 16px;
+        outline: none;
+        letter-spacing: 1px;
+    }
+    input#session-input:focus { border-color: var(--brass); }
+    input#session-input::placeholder { color: rgba(124, 156, 139, 0.5); }
 
-        .login-card p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 24px;
-        }
+    button#connect-btn {
+        background: linear-gradient(180deg, var(--brass-light), var(--brass));
+        border: none;
+        color: #201603;
+        padding: 0 18px;
+        border-radius: 8px;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 0.78rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        min-width: 84px;
+    }
+    button#connect-btn:active { transform: translateY(1px); }
+    button#connect-btn:disabled { opacity: 0.6; }
 
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
+    /* LED STATUS READOUT */
+    .readout {
+        margin-top: 12px;
+        background: #050f0a;
+        border: 1px solid rgba(0,0,0,0.4);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.78rem;
+        text-align: center;
+        color: var(--mono-grey);
+        min-height: 18px;
+        letter-spacing: 0.5px;
+    }
+    .readout.connected { color: var(--led-green); text-shadow: 0 0 8px rgba(63, 224, 138, 0.5); }
+    .readout.error { color: var(--led-red); text-shadow: 0 0 8px rgba(255, 92, 92, 0.5); animation: flicker 0.4s ease; }
+    @keyframes flicker {
+        0%, 100% { opacity: 1; }
+        40% { opacity: 0.3; }
+        60% { opacity: 1; }
+    }
 
-        .input-group label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+    /* DIE CONTROL GRID */
+    .die-grid {
+        width: 100%;
+        max-width: 380px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        opacity: 0.4;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        flex: 1;
+    }
+    .die-grid.active { opacity: 1; pointer-events: all; }
 
-        .input-field {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--panel-border);
-            padding: 12px 16px;
-            border-radius: 10px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
+    .die-tile {
+        --tile-color: #888;
+        position: relative;
+        aspect-ratio: 1 / 0.82;
+        border-radius: 14px;
+        border: 1px solid var(--brass-dim);
+        background: var(--felt-panel-raised);
+        overflow: hidden;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        perspective: 400px;
+    }
+    .die-tile:active .die-face { transform: scale(0.94); }
 
-        .input-field:focus {
-            border-color: var(--accent-purple);
-        }
+    .die-face {
+        font-size: 2.6rem;
+        line-height: 1;
+        color: var(--tile-color);
+        text-shadow: 0 0 16px color-mix(in srgb, var(--tile-color) 60%, transparent);
+        transition: transform 0.12s;
+    }
+    .die-label {
+        font-family: 'Space Mono', monospace;
+        font-size: 0.66rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--mono-grey);
+    }
 
-        .error-msg {
-            color: var(--accent-danger);
-            font-size: 0.85rem;
-            margin-top: -10px;
-            margin-bottom: 15px;
-            display: none;
-            font-weight: 600;
-        }
+    /* BRASS FLIP-COVER, drops down when a colour is blocked */
+    .flip-cover {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, var(--brass-light), var(--brass) 55%, #7a611a);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: rotateX(90deg);
+        transform-origin: top;
+        transition: transform 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+    }
+    .die-tile.selected .flip-cover { transform: rotateX(0deg); }
+    .flip-cover span {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.15rem;
+        letter-spacing: 2px;
+        color: #201603;
+    }
 
-        /* MAIN DASHBOARD PANEL CONTAINER */
-        .dashboard-container {
-            display: none; /* Kept hidden until login passes */
-            width: 100%;
-            max-width: 1200px;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        /* COMPACT MASTER HEADER */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            padding: 20px 30px;
-            border-radius: 16px;
-            backdrop-filter: blur(12px);
-        }
-
-        .brand-zone h1 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ff94cc 0%, #bd5cff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .brand-zone p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        /* MAIN GRID SYSTEM */
-        .workspace-grid {
-            display: grid;
-            grid-template-columns: 400px 1fr;
-            gap: 24px;
-            align-items: start;
-        }
-
-        @media (max-width: 950px) {
-            .workspace-grid { grid-template-columns: 1fr; }
-        }
-
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* CARD FRAMEWORK */
-        .card {
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            border-radius: 16px;
-            padding: 24px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-        }
-
-        .card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* APP STATUS BLOCK */
-        .status-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0,0,0,0.15);
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 0.95rem;
-        }
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: var(--accent-success);
-        }
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--accent-success);
-            border-radius: 50%;
-            animation: pulseGlow 1.5s infinite alternate;
-        }
-        @keyframes pulseGlow {
-            from { transform: scale(0.9); opacity: 0.6; }
-            to { transform: scale(1.2); opacity: 1; box-shadow: 0 0 8px var(--accent-success); }
-        }
-
-        /* BOX ACTION INTERCEPT BANNER */
-        .intercept-card {
-            display: none;
-            flex-direction: column;
-            border: 1px solid var(--accent-warning);
-            background: linear-gradient(180deg, rgba(255, 136, 56, 0.05) 0%, transparent 100%);
-            box-shadow: 0 0 25px rgba(255, 136, 56, 0.1);
-        }
-
-        .intercept-card.active {
-            display: flex;
-            animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(10px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .intercept-details {
-            background: rgba(0,0,0,0.2);
-            padding: 14px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 3px solid var(--accent-warning);
-        }
-
-        .intercept-details h3 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #fff;
-        }
-
-        .intercept-details p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-            word-break: break-word;
-        }
-
-        .vertical-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        /* RE-ENGINEERED BUTTONS */
-        button {
-            font-family: inherit;
-            font-weight: 700;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.15s ease;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        .btn-login {
-            background: var(--accent-purple);
-            color: #fff;
-            width: 100%;
-            padding: 14px;
-            box-shadow: 0 4px 15px rgba(189, 92, 255, 0.3);
-        }
-        .btn-login:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-        .btn-approve { background: var(--accent-success); color: #06040a; }
-        .btn-approve:hover { transform: translateY(-1px); filter: brightness(1.1); }
-
-        .btn-reject { background: var(--accent-danger); color: #ffffff; }
-        .btn-reject:hover { transform: translateY(-1px); filter: brightness(1.1); }
-
-        .btn-clear {
-            background: rgba(255, 74, 112, 0.08);
-            color: var(--accent-danger);
-            border: 1px solid rgba(255, 74, 112, 0.2);
-            padding: 8px 16px;
-            font-size: 0.85rem;
-        }
-        .btn-clear:hover { background: rgba(255, 74, 112, 0.15); }
-
-        /* ACTIVITY FEED STREAM */
-        .log-feed {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 620px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-        .log-feed::-webkit-scrollbar { width: 4px; }
-        .log-feed::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
-
-        .feed-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 18px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.03);
-            border-radius: 12px;
-            gap: 16px;
-        }
-
-        .feed-main { display: flex; flex-direction: column; gap: 2px; }
-        .feed-title { font-size: 0.95rem; font-weight: 700; }
-        .feed-desc { font-size: 0.85rem; color: var(--text-muted); }
-        .feed-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-        .feed-time { font-size: 0.8rem; color: rgba(255,255,255,0.3); font-weight: 600; }
-
-        .badge {
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
-        .badge.b-allowed { background: rgba(40, 245, 139, 0.12); color: var(--accent-success); }
-        .badge.b-blocked { background: rgba(255, 74, 110, 0.12); color: var(--accent-danger); }
-    </style>
+    #clear-btn {
+        margin-top: 16px;
+        width: 100%;
+        max-width: 380px;
+        background: transparent;
+        border: 1px solid var(--brass-dim);
+        color: var(--brass-light);
+        padding: 15px;
+        border-radius: 10px;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        font-size: 0.78rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+    }
+    #clear-btn:active { transform: scale(0.98); }
+</style>
 </head>
 <body>
+    <div class="marquee">
+        <div class="eyebrow">Colour Dice</div>
+        <h1>Pit Control</h1>
+        <p>Patch into a table's session, then lock out a colour before the next roll.</p>
+    </div>
 
-    <div id="login-overlay" class="login-overlay">
-        <div class="login-card">
-            <h2>Security Verification</h2>
-            <p>Accessing telemetry operations node</p>
-            
-            <div class="input-group">
-                <label for="admin-user">Username</label>
-                <input type="text" id="admin-user" class="input-field" placeholder="Admin identifier">
-            </div>
+    <div class="session-plate">
+        <div class="rivet-tl"></div><div class="rivet-tr"></div><div class="rivet-bl"></div><div class="rivet-br"></div>
+        <div class="session-row">
+            <input type="text" id="session-input" placeholder="SESSION ID" autocomplete="off" autocapitalize="none" autocorrect="off">
+            <button id="connect-btn" onclick="connectSession()">Patch In</button>
+        </div>
+        <div class="readout" id="status-line">NOT CONNECTED</div>
+    </div>
 
-            <div class="input-group">
-                <label for="admin-pass">Access Code</label>
-                <input type="password" id="admin-pass" class="input-field" placeholder="••••••••">
-            </div>
-
-            <div id="error-msg" class="error-msg">Invalid Credentials Provided</div>
-
-            <button class="btn-login" onclick="attemptLogin()">Verify Node</button>
+    <div class="die-grid" id="die-grid">
+        <div class="die-tile" style="--tile-color: var(--die-red)" data-color="Red" onclick="blockColor('Red')">
+            <div class="die-face">⚀</div>
+            <div class="die-label">Red</div>
+            <div class="flip-cover"><span>Blocked</span></div>
+        </div>
+        <div class="die-tile" style="--tile-color: var(--die-orange)" data-color="Orange" onclick="blockColor('Orange')">
+            <div class="die-face">⚁</div>
+            <div class="die-label">Orange</div>
+            <div class="flip-cover"><span>Blocked</span></div>
+        </div>
+        <div class="die-tile" style="--tile-color: var(--die-yellow)" data-color="Yellow" onclick="blockColor('Yellow')">
+            <div class="die-face">⚂</div>
+            <div class="die-label">Yellow</div>
+            <div class="flip-cover"><span>Blocked</span></div>
+        </div>
+        <div class="die-tile" style="--tile-color: var(--die-green)" data-color="Green" onclick="blockColor('Green')">
+            <div class="die-face">⚃</div>
+            <div class="die-label">Green</div>
+            <div class="flip-cover"><span>Blocked</span></div>
+        </div>
+        <div class="die-tile" style="--tile-color: var(--die-blue)" data-color="Blue" onclick="blockColor('Blue')">
+            <div class="die-face">⚄</div>
+            <div class="die-label">Blue</div>
+            <div class="flip-cover"><span>Blocked</span></div>
+        </div>
+        <div class="die-tile" style="--tile-color: var(--die-purple)" data-color="Purple" onclick="blockColor('Purple')">
+            <div class="die-face">⚅</div>
+            <div class="die-label">Purple</div>
+            <div class="flip-cover"><span>Blocked</span></div>
         </div>
     </div>
 
-    <div id="dashboard-container" class="dashboard-container">
-        
-        <header>
-            <div class="brand-zone">
-                <h1>Dice Telemetry Control Panel</h1>
-                <p>Real-time configuration controller & tracking nexus</p>
-            </div>
-            <div>
-                <button class="btn-clear" onclick="clearLogs()">Clear Feed</button>
-            </div>
-        </header>
-
-        <div class="workspace-grid">
-            <div class="column">
-                <div class="card">
-                    <div class="card-title">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                        System Status
-                    </div>
-                    <div class="status-row">
-                        <span>Telemetry Listener</span>
-                        <div class="status-indicator">
-                            <span class="status-dot"></span>
-                            <span>ACTIVE</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="intercept-card" class="card intercept-card">
-                    <div class="card-title" style="color: var(--accent-warning);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        Pending Intercept
-                    </div>
-                    <div class="intercept-details">
-                        <h3 id="intercept-heading">Configuration Detected</h3>
-                        <p id="intercept-info">Loading trace inputs...</p>
-                    </div>
-                    <div class="vertical-actions">
-                        <button class="btn-approve" onclick="sendDecision('approved')">ALLOW CONFIGURATION</button>
-                        <button class="btn-reject" onclick="sendDecision('rejected')">REJECT & FORCE NORMAL</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="column">
-                <div class="card" style="flex: 1;">
-                    <div class="card-title">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                        Activity Stream Logs
-                    </div>
-                    <div id="log-list-root" class="log-feed"></div>
-                </div>
-            </div>
-        </div>
-
-    </div>
+    <button id="clear-btn" onclick="clearBlock()">Release Block</button>
 
     <script>
-        // CONFIGURATION VARIABLES
-        const SERVER_URL = 'https://dice-cheat-logger.onrender.com';
-        const ADMIN_PASSWORD = 'SUPER_SECRET_ADMIN_PASSWORD_123'; 
-        
-        // Define credentials required to bypass overlay
-        const LOGIN_USERNAME = "admin";
-        const LOGIN_PASSWORD = "password123";
+        const BACKEND_URL = 'https://dice-cheat-logger.onrender.com';
+        let activeSession = null;
+        let pollTimer = null;
 
-        const loginOverlay = document.getElementById('login-overlay');
-        const dashboardContainer = document.getElementById('dashboard-container');
-        const errorMsg = document.getElementById('error-msg');
-        
-        const interceptCard = document.getElementById('intercept-card');
-        const interceptInfo = document.getElementById('intercept-info');
-        const interceptHeading = document.getElementById('intercept-heading');
-        const logListRoot = document.getElementById('log-list-root');
+        const sessionInput = document.getElementById('session-input');
+        const connectBtn = document.getElementById('connect-btn');
+        const statusLine = document.getElementById('status-line');
+        const dieGrid = document.getElementById('die-grid');
 
-        // Handles local identity matching
-        function attemptLogin() {
-            const userIn = document.getElementById('admin-user').value;
-            const passIn = document.getElementById('admin-pass').value;
+        async function connectSession() {
+            const value = sessionInput.value.trim();
+            if (!value) {
+                setStatus('ENTER A SESSION ID FIRST', 'error');
+                return;
+            }
 
-            if (userIn === LOGIN_USERNAME && passIn === LOGIN_PASSWORD) {
-                // Clear and unroll interface windows
-                loginOverlay.style.display = 'none';
-                dashboardContainer.style.display = 'flex';
-                document.body.style.alignItems = 'start';
-                
-                // Initialize background synchronization procedures
-                initializeDashboard();
-            } else {
-                errorMsg.style.display = 'block';
+            connectBtn.disabled = true;
+            connectBtn.textContent = '...';
+            setStatus('CHECKING TABLE...', '');
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/check-session?session=${encodeURIComponent(value)}`);
+                const data = await res.json();
+
+                if (data.exists) {
+                    activeSession = value;
+                    setStatus(`CONNECTED — SESSION "${activeSession.toUpperCase()}"`, 'connected');
+                    dieGrid.classList.add('active');
+                    startPolling();
+                } else {
+                    activeSession = null;
+                    dieGrid.classList.remove('active');
+                    setStatus('SESSION ID NOT FOUND :(', 'error');
+                    stopPolling();
+                }
+            } catch (e) {
+                setStatus('COULD NOT REACH THE SERVER', 'error');
+            } finally {
+                connectBtn.disabled = false;
+                connectBtn.textContent = 'Patch In';
             }
         }
 
-        function initializeDashboard() {
-            fetchLogs();
-            setInterval(checkPendingRolls, 500); 
-            setInterval(fetchLogs, 4000);
+        function setStatus(text, cls) {
+            statusLine.textContent = text;
+            statusLine.className = 'readout' + (cls ? ' ' + cls : '');
         }
 
-        async function checkPendingRolls() {
-            try {
-                const response = await fetch(`${SERVER_URL}/check-pending?key=${ADMIN_PASSWORD}&t=${Date.now()}`);
-                const pending = await response.json();
+        function startPolling() {
+            stopPolling();
+            pollTimer = setInterval(checkBlockStatus, 2000);
+        }
 
-                if (pending) {
-                    interceptHeading.innerText = pending.action;
-                    interceptInfo.innerText = pending.details;
-                    interceptCard.classList.add('active');
-                } else {
-                    interceptCard.classList.remove('active');
+        function stopPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = null;
+        }
+
+        async function checkBlockStatus() {
+            if (!activeSession) return;
+            const wasSelected = document.querySelector('.die-tile.selected');
+            if (!wasSelected) return;
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/block-status?session=${encodeURIComponent(activeSession)}`);
+                const data = await res.json();
+
+                if (!data.blockedColor) {
+                    document.querySelectorAll('.die-tile').forEach(t => t.classList.remove('selected'));
+                    setStatus('ROLL LOGGED — PICK AGAIN', 'connected');
                 }
             } catch (e) {}
         }
 
-        async function sendDecision(type) {
+        async function blockColor(color) {
+            if (!activeSession) return;
+            document.querySelectorAll('.die-tile').forEach(t => t.classList.remove('selected'));
+            document.querySelector(`.die-tile[data-color="${color}"]`).classList.add('selected');
+
             try {
-                await fetch(`${SERVER_URL}/decide-roll?key=${ADMIN_PASSWORD}`, {
+                await fetch(`${BACKEND_URL}/block-color`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ decision: type })
+                    body: JSON.stringify({ session: activeSession, color })
                 });
-                fetchLogs();
-            } catch (e) {}
-        }
-
-        async function fetchLogs() {
-            try {
-                const response = await fetch(`${SERVER_URL}/get-cheats?key=${ADMIN_PASSWORD}`);
-                const logs = await response.json();
-                renderLogs(logs);
-            } catch (err) {}
-        }
-
-        function renderLogs(logs) {
-            if (logs.length === 0) {
-                logListRoot.innerHTML = `
-                    <div style="text-align:center; padding:40px 10px; color:var(--text-muted); font-size:0.9rem; font-weight:500;">
-                        No history records registered in this terminal session.
-                    </div>`;
-                return;
+                setStatus(`"${color.toUpperCase()}" LOCKED FOR NEXT ROLL`, 'connected');
+            } catch (e) {
+                setStatus('COULD NOT REACH THE SERVER', 'error');
             }
-            logListRoot.innerHTML = '';
-            logs.forEach(log => {
-                const isRejected = log.details.includes("BLOCKED");
-                const badgeHTML = isRejected ? '<span class="badge b-blocked">Overridden</span>' : '<span class="badge b-allowed">Allowed</span>';
-
-                logListRoot.innerHTML += `
-                    <div class="feed-row">
-                        <div class="feed-main">
-                            <span class="feed-title">${log.action}</span>
-                            <span class="feed-desc">${log.details}</span>
-                        </div>
-                        <div class="feed-meta">
-                            <span class="feed-time">${new Date(log.timestamp).toLocaleTimeString()}</span>
-                            ${badgeHTML}
-                        </div>
-                    </div>`;
-            });
         }
 
-        async function clearLogs() {
-            if (!confirm("Wipe all system activity logs?")) return;
-            await fetch(`${SERVER_URL}/clear-cheats?key=${ADMIN_PASSWORD}`, { method: 'DELETE' });
-            fetchLogs();
+        async function clearBlock() {
+            if (!activeSession) return;
+            document.querySelectorAll('.die-tile').forEach(t => t.classList.remove('selected'));
+            try {
+                await fetch(`${BACKEND_URL}/block-color`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session: activeSession, color: null })
+                });
+                setStatus('BLOCK RELEASED', 'connected');
+            } catch (e) {
+                setStatus('COULD NOT REACH THE SERVER', 'error');
+            }
         }
     </script>
 </body>
