@@ -33,6 +33,24 @@
         --die-purple: #8a3bef;
     }
 
+    /* DAYLIGHT CASINO — light brass alternate skin */
+    body.theme-light {
+        --felt-dark: #eef1e6;
+        --felt-panel: #ffffff;
+        --felt-panel-raised: #f6f4ea;
+        --brass: #a9791a;
+        --brass-light: #d4a92f;
+        --brass-dim: rgba(169, 121, 26, 0.35);
+        --cream: #241c0d;
+        --mono-grey: #6b6455;
+        --led-amber: #b5790a;
+        --led-green: #1f8f4e;
+        --led-red: #c23b3b;
+    }
+    body.theme-light input#session-input { background: #fbfaf4; color: var(--cream); border-color: rgba(0,0,0,0.1); }
+    body.theme-light .readout { background: #fbfaf4; border-color: rgba(0,0,0,0.1); }
+    body.theme-light .feed-panel { background: #fbfaf4; }
+
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; }
     body {
@@ -56,7 +74,27 @@
     .marquee {
         text-align: center;
         margin-bottom: 20px;
+        position: relative;
+        width: 100%;
+        max-width: 380px;
     }
+    .theme-toggle-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: var(--felt-panel-raised);
+        border: 1px solid var(--brass-dim);
+        color: var(--brass-light);
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .theme-toggle-btn:active { transform: scale(0.92); }
     .marquee .eyebrow {
         font-family: 'Space Mono', monospace;
         font-size: 0.68rem;
@@ -105,6 +143,55 @@
     .rivet-tr { top: 7px; right: 7px; }
     .rivet-bl { bottom: 7px; left: 7px; }
     .rivet-br { bottom: 7px; right: 7px; }
+
+    /* CONNECTION HEALTH DOT */
+    .conn-dot-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 8px;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.62rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--mono-grey);
+    }
+    .conn-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #555;
+        box-shadow: 0 0 6px #555;
+        flex-shrink: 0;
+    }
+    .conn-dot.live { background: var(--led-green); box-shadow: 0 0 8px var(--led-green); animation: connPulse 1.4s ease-in-out infinite; }
+    .conn-dot.stale { background: var(--led-amber); box-shadow: 0 0 8px var(--led-amber); }
+    .conn-dot.lost { background: var(--led-red); box-shadow: 0 0 8px var(--led-red); }
+    @keyframes connPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.45; }
+    }
+
+    /* RECENT SESSION CHIPS */
+    .recent-sessions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+    }
+    .recent-chip {
+        background: var(--felt-panel-raised);
+        border: 1px solid var(--brass-dim);
+        color: var(--mono-grey);
+        font-family: 'Space Mono', monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.5px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+    }
+    .recent-chip:active { transform: scale(0.95); }
+    .recent-chip.current { color: var(--brass-light); border-color: var(--brass); }
 
     .session-row { display: flex; gap: 8px; }
     input#session-input {
@@ -246,10 +333,66 @@
         cursor: pointer;
     }
     #clear-btn:active { transform: scale(0.98); }
+
+    /* VISUAL ROLL FEED */
+    .feed-panel {
+        width: 100%;
+        max-width: 380px;
+        background: var(--felt-panel);
+        border: 1px solid var(--brass-dim);
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-top: 16px;
+        position: relative;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .feed-panel .feed-title {
+        font-family: 'Space Mono', monospace;
+        font-size: 0.66rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--brass);
+        margin-bottom: 10px;
+    }
+    .feed-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 220px;
+        overflow-y: auto;
+    }
+    .feed-entry {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.72rem;
+        color: var(--cream);
+        padding: 6px 8px;
+        background: rgba(0,0,0,0.15);
+        border-radius: 6px;
+        animation: feedIn 0.25s ease;
+    }
+    body.theme-light .feed-entry { background: rgba(0,0,0,0.04); }
+    .feed-entry .feed-time {
+        color: var(--mono-grey);
+        font-size: 0.62rem;
+        flex-shrink: 0;
+    }
+    .feed-entry.type-block { color: var(--led-amber); }
+    .feed-entry.type-clear { color: var(--mono-grey); }
+    .feed-entry.type-roll { color: var(--led-green); }
+    .feed-entry.type-error { color: var(--led-red); }
+    .feed-empty { color: var(--mono-grey); font-size: 0.72rem; text-align: center; padding: 10px 0; }
+    @keyframes feedIn {
+        0% { opacity: 0; transform: translateY(-4px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
 </style>
 </head>
 <body>
     <div class="marquee">
+        <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
         <div class="eyebrow">Colour Dice</div>
         <h1>Pit Control</h1>
         <p>Patch into a table's session, then lock out a colour before the next roll.</p>
@@ -262,6 +405,11 @@
             <button id="connect-btn" onclick="connectSession()">Patch In</button>
         </div>
         <div class="readout" id="status-line">NOT CONNECTED</div>
+        <div class="conn-dot-row">
+            <div class="conn-dot" id="conn-dot"></div>
+            <span id="conn-label">No connection yet</span>
+        </div>
+        <div class="recent-sessions" id="recent-sessions"></div>
     </div>
 
     <div class="die-grid" id="die-grid">
@@ -299,15 +447,110 @@
 
     <button id="clear-btn" onclick="clearBlock()">Release Block</button>
 
+    <div class="feed-panel">
+        <div class="feed-title">Activity Log</div>
+        <div class="feed-list" id="feed-list">
+            <div class="feed-empty" id="feed-empty">No activity yet</div>
+        </div>
+    </div>
+
     <script>
         const BACKEND_URL = 'https://dice-cheat-logger.onrender.com';
         let activeSession = null;
         let pollTimer = null;
+        let connHealthTimer = null;
+        let lastSuccessTime = null;
 
         const sessionInput = document.getElementById('session-input');
         const connectBtn = document.getElementById('connect-btn');
         const statusLine = document.getElementById('status-line');
         const dieGrid = document.getElementById('die-grid');
+        const connDot = document.getElementById('conn-dot');
+        const connLabel = document.getElementById('conn-label');
+        const recentSessionsRoot = document.getElementById('recent-sessions');
+        const feedList = document.getElementById('feed-list');
+        const feedEmpty = document.getElementById('feed-empty');
+
+        // ---------- THEME TOGGLE ----------
+        function applyTheme(theme) {
+            document.body.classList.toggle('theme-light', theme === 'light');
+            document.getElementById('theme-toggle-btn').textContent = theme === 'light' ? '☀️' : '🌙';
+        }
+        function toggleTheme() {
+            const isLight = document.body.classList.contains('theme-light');
+            const next = isLight ? 'dark' : 'light';
+            localStorage.setItem('colourdice_pit_theme', next);
+            applyTheme(next);
+        }
+        applyTheme(localStorage.getItem('colourdice_pit_theme') || 'dark');
+
+        // ---------- RECENT SESSIONS (LOCAL ONLY — sessions you've personally connected to) ----------
+        function getRecentSessions() {
+            try { return JSON.parse(localStorage.getItem('colourdice_pit_recent_sessions') || '[]'); }
+            catch (e) { return []; }
+        }
+        function saveRecentSession(id) {
+            let list = getRecentSessions().filter(s => s.toLowerCase() !== id.toLowerCase());
+            list.unshift(id);
+            list = list.slice(0, 5);
+            localStorage.setItem('colourdice_pit_recent_sessions', JSON.stringify(list));
+            renderRecentSessions();
+        }
+        function renderRecentSessions() {
+            const list = getRecentSessions();
+            recentSessionsRoot.innerHTML = '';
+            list.forEach(id => {
+                const chip = document.createElement('div');
+                chip.className = 'recent-chip' + (activeSession && activeSession.toLowerCase() === id.toLowerCase() ? ' current' : '');
+                chip.textContent = id.toUpperCase();
+                chip.onclick = () => {
+                    sessionInput.value = id;
+                    connectSession();
+                };
+                recentSessionsRoot.appendChild(chip);
+            });
+        }
+        renderRecentSessions();
+
+        // ---------- CONNECTION HEALTH ----------
+        function markConnectionSuccess() {
+            lastSuccessTime = Date.now();
+            updateConnDot();
+        }
+        function updateConnDot() {
+            if (!lastSuccessTime) {
+                connDot.className = 'conn-dot';
+                connLabel.textContent = 'No connection yet';
+                return;
+            }
+            const ageSec = Math.round((Date.now() - lastSuccessTime) / 1000);
+            if (ageSec <= 4) {
+                connDot.className = 'conn-dot live';
+                connLabel.textContent = 'Live';
+            } else if (ageSec <= 12) {
+                connDot.className = 'conn-dot stale';
+                connLabel.textContent = `Stale — ${ageSec}s ago`;
+            } else {
+                connDot.className = 'conn-dot lost';
+                connLabel.textContent = `Lost — ${ageSec}s ago`;
+            }
+        }
+        connHealthTimer = setInterval(updateConnDot, 1000);
+        updateConnDot();
+
+        // ---------- VISUAL ROLL FEED ----------
+        function addFeedEntry(text, type) {
+            if (feedEmpty) feedEmpty.remove();
+            const entry = document.createElement('div');
+            entry.className = 'feed-entry' + (type ? ` type-${type}` : '');
+            const now = new Date();
+            const time = now.toTimeString().slice(0, 8);
+            entry.innerHTML = `<span class="feed-time">${time}</span><span>${text}</span>`;
+            feedList.insertBefore(entry, feedList.firstChild);
+            while (feedList.children.length > 25) {
+                feedList.removeChild(feedList.lastChild);
+            }
+        }
 
         async function connectSession() {
             const value = sessionInput.value.trim();
@@ -323,20 +566,25 @@
             try {
                 const res = await fetch(`${BACKEND_URL}/check-session?session=${encodeURIComponent(value)}`);
                 const data = await res.json();
+                markConnectionSuccess();
 
                 if (data.exists) {
                     activeSession = value;
                     setStatus(`CONNECTED — SESSION "${activeSession.toUpperCase()}"`, 'connected');
                     dieGrid.classList.add('active');
                     startPolling();
+                    saveRecentSession(value);
+                    addFeedEntry(`Connected to session "${value.toUpperCase()}"`, 'roll');
                 } else {
                     activeSession = null;
                     dieGrid.classList.remove('active');
                     setStatus('SESSION ID NOT FOUND :(', 'error');
                     stopPolling();
+                    addFeedEntry(`Session "${value.toUpperCase()}" not found`, 'error');
                 }
             } catch (e) {
                 setStatus('COULD NOT REACH THE SERVER', 'error');
+                addFeedEntry('Could not reach the server', 'error');
             } finally {
                 connectBtn.disabled = false;
                 connectBtn.textContent = 'Patch In';
@@ -366,10 +614,12 @@
             try {
                 const res = await fetch(`${BACKEND_URL}/block-status?session=${encodeURIComponent(activeSession)}`);
                 const data = await res.json();
+                markConnectionSuccess();
 
                 if (!data.blockedColor) {
                     document.querySelectorAll('.die-tile').forEach(t => t.classList.remove('selected'));
                     setStatus('ROLL LOGGED — PICK AGAIN', 'connected');
+                    addFeedEntry('Roll logged — block cleared', 'roll');
                 }
             } catch (e) {}
         }
@@ -385,9 +635,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ session: activeSession, color })
                 });
+                markConnectionSuccess();
                 setStatus(`"${color.toUpperCase()}" LOCKED FOR NEXT ROLL`, 'connected');
+                addFeedEntry(`Blocked "${color.toUpperCase()}"`, 'block');
             } catch (e) {
                 setStatus('COULD NOT REACH THE SERVER', 'error');
+                addFeedEntry('Could not reach the server', 'error');
             }
         }
 
@@ -400,9 +653,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ session: activeSession, color: null })
                 });
+                markConnectionSuccess();
                 setStatus('BLOCK RELEASED', 'connected');
+                addFeedEntry('Block released', 'clear');
             } catch (e) {
                 setStatus('COULD NOT REACH THE SERVER', 'error');
+                addFeedEntry('Could not reach the server', 'error');
             }
         }
     </script>
